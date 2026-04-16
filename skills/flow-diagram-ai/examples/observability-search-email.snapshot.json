@@ -1,0 +1,210 @@
+{
+  "version": 1,
+  "meta": {
+    "id": "observability-search-email",
+    "name": "Architecture: Observability Search Email",
+    "description": "Catalog and analytics flow centered on search, email delivery, feature flags, and observability.",
+    "systemSlug": "observability-search-email",
+    "status": "analyzed",
+    "createdAt": "2026-04-15T20:16:00.000Z",
+    "updatedAt": "2026-04-15T20:16:00.000Z"
+  },
+  "diagrams": [
+    {
+      "id": "observability-search-email",
+      "name": "Architecture: Observability Search Email",
+      "desc": "Primary architecture snapshot",
+      "dot": true
+    }
+  ],
+  "layout": {
+    "nodes": [
+      {
+        "id": "admin-web",
+        "label": "Admin Web",
+        "sublabel": "SERVICE",
+        "type": "SERVICE",
+        "tech": "React",
+        "x": 42,
+        "y": 138,
+        "w": 168,
+        "h": 92,
+        "ops": ["VIEW", "SEARCH"]
+      },
+      {
+        "id": "api-gateway",
+        "label": "API Gateway",
+        "sublabel": "GATEWAY",
+        "type": "GATEWAY",
+        "tech": "Traefik",
+        "x": 42,
+        "y": 292,
+        "w": 168,
+        "h": 92,
+        "ops": ["ROUTE", "AUTH"]
+      },
+      {
+        "id": "catalog-service",
+        "label": "Catalog Service",
+        "sublabel": "SERVICE",
+        "type": "SERVICE",
+        "tech": "Node.js",
+        "x": 300,
+        "y": 120,
+        "w": 168,
+        "h": 92,
+        "ops": ["READ", "WRITE", "INDEX"]
+      },
+      {
+        "id": "analytics-worker",
+        "label": "Analytics Worker",
+        "sublabel": "WORKER",
+        "type": "WORKER",
+        "tech": "Go",
+        "x": 300,
+        "y": 284,
+        "w": 168,
+        "h": 92,
+        "ops": ["AGGREGATE", "EMAIL"]
+      },
+      {
+        "id": "events-queue",
+        "label": "Events Queue",
+        "sublabel": "QUEUE",
+        "type": "QUEUE",
+        "tech": "Kafka",
+        "x": 300,
+        "y": 438,
+        "w": 172,
+        "h": 92,
+        "ops": ["PUBLISH", "CONSUME"]
+      },
+      {
+        "id": "feature-flags",
+        "label": "Feature Flags",
+        "sublabel": "FEATURE_FLAGS",
+        "type": "FEATURE_FLAGS",
+        "tech": "LaunchDarkly",
+        "x": 570,
+        "y": 58,
+        "w": 168,
+        "h": 92,
+        "ops": ["TARGET", "READ"]
+      },
+      {
+        "id": "search-engine",
+        "label": "Search Engine",
+        "sublabel": "SEARCH_ENGINE",
+        "type": "SEARCH_ENGINE",
+        "tech": "OpenSearch",
+        "x": 570,
+        "y": 188,
+        "w": 168,
+        "h": 92,
+        "ops": ["INDEX", "QUERY"]
+      },
+      {
+        "id": "email-gateway",
+        "label": "Email Gateway",
+        "sublabel": "EMAIL_GATEWAY",
+        "type": "EMAIL_GATEWAY",
+        "tech": "Resend",
+        "x": 570,
+        "y": 316,
+        "w": 168,
+        "h": 92,
+        "ops": ["SEND", "TEMPLATE"]
+      },
+      {
+        "id": "observability",
+        "label": "Observability",
+        "sublabel": "OBSERVABILITY",
+        "type": "OBSERVABILITY",
+        "tech": "Datadog",
+        "x": 570,
+        "y": 446,
+        "w": 168,
+        "h": 92,
+        "ops": ["TRACE", "ALERT"]
+      },
+      {
+        "id": "reporting-db",
+        "label": "Reporting DB",
+        "sublabel": "DATABASE",
+        "type": "DATABASE",
+        "tech": "PostgreSQL",
+        "x": 840,
+        "y": 286,
+        "w": 185,
+        "h": 92,
+        "ops": []
+      }
+    ],
+    "connections": [
+      { "id": "c1", "from": "admin-web", "to": "api-gateway", "label": "HTTP", "dashed": false },
+      { "id": "c2", "from": "api-gateway", "to": "catalog-service", "label": "REST", "dashed": false },
+      { "id": "c3", "from": "catalog-service", "to": "events-queue", "label": "publish", "dashed": false },
+      { "id": "c4", "from": "events-queue", "to": "analytics-worker", "label": "consume", "dashed": true },
+      { "id": "c5", "from": "catalog-service", "to": "search-engine", "label": "index", "dashed": false },
+      { "id": "c6", "from": "catalog-service", "to": "feature-flags", "label": "flags", "dashed": false },
+      { "id": "c7", "from": "analytics-worker", "to": "email-gateway", "label": "digest", "dashed": false },
+      { "id": "c8", "from": "analytics-worker", "to": "reporting-db", "label": "write", "dashed": false },
+      { "id": "c9", "from": "catalog-service", "to": "observability", "label": "metrics", "dashed": true },
+      { "id": "c10", "from": "analytics-worker", "to": "observability", "label": "traces", "dashed": true },
+      { "id": "c11", "from": "api-gateway", "to": "observability", "label": "api", "dashed": true }
+    ]
+  },
+  "endpointsByNode": {
+    "admin-web": [
+      { "method": "GET", "path": "/" },
+      { "method": "GET", "path": "/catalog" },
+      { "method": "GET", "path": "/analytics" }
+    ],
+    "api-gateway": [
+      { "method": "GET", "path": "/health" },
+      { "method": "GET", "path": "/catalog" },
+      { "method": "GET", "path": "/analytics/summary" }
+    ],
+    "catalog-service": [
+      { "method": "GET", "path": "/catalog/items" },
+      { "method": "POST", "path": "/catalog/items" },
+      { "method": "PATCH", "path": "/catalog/items/:id" },
+      { "method": "GET", "path": "/catalog/search" }
+    ],
+    "analytics-worker": [
+      { "method": "POST", "path": "/jobs/aggregate" },
+      { "method": "POST", "path": "/jobs/email-digest" }
+    ],
+    "events-queue": [
+      { "method": "POST", "path": "/events/catalog.updated" },
+      { "method": "GET", "path": "/topics/analytics" }
+    ],
+    "feature-flags": [
+      { "method": "GET", "path": "/flags" },
+      { "method": "POST", "path": "/flags/evaluate" }
+    ],
+    "search-engine": [
+      { "method": "POST", "path": "/index/catalog" },
+      { "method": "GET", "path": "/query" }
+    ],
+    "email-gateway": [
+      { "method": "GET", "path": "/templates" },
+      { "method": "POST", "path": "/messages/send" }
+    ],
+    "observability": [
+      { "method": "POST", "path": "/logs" },
+      { "method": "POST", "path": "/metrics" },
+      { "method": "GET", "path": "/alerts" }
+    ],
+    "reporting-db": []
+  },
+  "analysis": {
+    "source": "ai",
+    "lastAnalyzedAt": "2026-04-15T20:16:00.000Z",
+    "stats": {
+      "services": 10,
+      "endpoints": 23,
+      "flows": 11
+    }
+  }
+}

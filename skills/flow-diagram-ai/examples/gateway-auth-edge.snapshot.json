@@ -1,0 +1,194 @@
+{
+  "version": 1,
+  "meta": {
+    "id": "gateway-auth-edge",
+    "name": "Architecture: Gateway Auth Edge",
+    "description": "Edge delivery stack with CDN, load balancer, gateway, authentication provider, and user service.",
+    "systemSlug": "gateway-auth-edge",
+    "status": "analyzed",
+    "createdAt": "2026-04-15T20:14:00.000Z",
+    "updatedAt": "2026-04-15T20:14:00.000Z"
+  },
+  "diagrams": [
+    {
+      "id": "gateway-auth-edge",
+      "name": "Architecture: Gateway Auth Edge",
+      "desc": "Primary architecture snapshot",
+      "dot": true
+    }
+  ],
+  "layout": {
+    "nodes": [
+      {
+        "id": "edge-cdn",
+        "label": "Edge CDN",
+        "sublabel": "CDN",
+        "type": "CDN",
+        "tech": "Cloudflare",
+        "x": 40,
+        "y": 62,
+        "w": 168,
+        "h": 92,
+        "ops": ["EDGE", "CACHE"]
+      },
+      {
+        "id": "public-lb",
+        "label": "Public Load Balancer",
+        "sublabel": "LOAD_BALANCER",
+        "type": "LOAD_BALANCER",
+        "tech": "NGINX",
+        "x": 40,
+        "y": 198,
+        "w": 168,
+        "h": 92,
+        "ops": ["ROUTE", "BALANCE"]
+      },
+      {
+        "id": "web-client",
+        "label": "Web Client",
+        "sublabel": "SERVICE",
+        "type": "SERVICE",
+        "tech": "React",
+        "x": 40,
+        "y": 350,
+        "w": 168,
+        "h": 92,
+        "ops": ["LOGIN", "VIEW"]
+      },
+      {
+        "id": "api-gateway",
+        "label": "API Gateway",
+        "sublabel": "GATEWAY",
+        "type": "GATEWAY",
+        "tech": "Kong",
+        "x": 304,
+        "y": 200,
+        "w": 168,
+        "h": 92,
+        "ops": ["ROUTE", "AUTH", "RATE LIMIT"]
+      },
+      {
+        "id": "auth-provider",
+        "label": "Identity Provider",
+        "sublabel": "AUTH_PROVIDER",
+        "type": "AUTH_PROVIDER",
+        "tech": "Keycloak",
+        "x": 304,
+        "y": 350,
+        "w": 168,
+        "h": 92,
+        "ops": ["LOGIN", "TOKEN"]
+      },
+      {
+        "id": "user-service",
+        "label": "User Service",
+        "sublabel": "SERVICE",
+        "type": "SERVICE",
+        "tech": "NestJS",
+        "x": 580,
+        "y": 118,
+        "w": 168,
+        "h": 92,
+        "ops": ["READ", "WRITE", "PROFILE"]
+      },
+      {
+        "id": "session-cache",
+        "label": "Session Cache",
+        "sublabel": "CACHE",
+        "type": "CACHE",
+        "tech": "Redis",
+        "x": 580,
+        "y": 256,
+        "w": 180,
+        "h": 92,
+        "ops": ["GET", "SET"]
+      },
+      {
+        "id": "audit-db",
+        "label": "Audit PostgreSQL",
+        "sublabel": "DATABASE",
+        "type": "DATABASE",
+        "tech": "PostgreSQL",
+        "x": 844,
+        "y": 194,
+        "w": 185,
+        "h": 92,
+        "ops": []
+      },
+      {
+        "id": "observability",
+        "label": "Observability",
+        "sublabel": "OBSERVABILITY",
+        "type": "OBSERVABILITY",
+        "tech": "Grafana",
+        "x": 580,
+        "y": 394,
+        "w": 168,
+        "h": 92,
+        "ops": ["TRACE", "ALERT"]
+      }
+    ],
+    "connections": [
+      { "id": "c1", "from": "edge-cdn", "to": "web-client", "label": "edge", "dashed": false },
+      { "id": "c2", "from": "public-lb", "to": "api-gateway", "label": "route", "dashed": false },
+      { "id": "c3", "from": "web-client", "to": "api-gateway", "label": "HTTP", "dashed": false },
+      { "id": "c4", "from": "web-client", "to": "auth-provider", "label": "login", "dashed": false },
+      { "id": "c5", "from": "api-gateway", "to": "auth-provider", "label": "token", "dashed": false },
+      { "id": "c6", "from": "api-gateway", "to": "user-service", "label": "REST", "dashed": false },
+      { "id": "c7", "from": "auth-provider", "to": "session-cache", "label": "cache", "dashed": true },
+      { "id": "c8", "from": "user-service", "to": "audit-db", "label": "write", "dashed": false },
+      { "id": "c9", "from": "api-gateway", "to": "observability", "label": "metrics", "dashed": true },
+      { "id": "c10", "from": "auth-provider", "to": "observability", "label": "traces", "dashed": true }
+    ]
+  },
+  "endpointsByNode": {
+    "edge-cdn": [
+      { "method": "GET", "path": "/app/*" },
+      { "method": "GET", "path": "/assets/*" }
+    ],
+    "public-lb": [
+      { "method": "GET", "path": "/" },
+      { "method": "GET", "path": "/api/*" }
+    ],
+    "web-client": [
+      { "method": "GET", "path": "/" },
+      { "method": "GET", "path": "/account" },
+      { "method": "GET", "path": "/signin" }
+    ],
+    "api-gateway": [
+      { "method": "GET", "path": "/health" },
+      { "method": "GET", "path": "/me" },
+      { "method": "POST", "path": "/auth/logout" },
+      { "method": "GET", "path": "/users/:id" }
+    ],
+    "auth-provider": [
+      { "method": "GET", "path": "/oauth/authorize" },
+      { "method": "POST", "path": "/oauth/token" },
+      { "method": "GET", "path": "/userinfo" }
+    ],
+    "user-service": [
+      { "method": "GET", "path": "/users/:id" },
+      { "method": "PATCH", "path": "/users/:id" },
+      { "method": "GET", "path": "/users/:id/sessions" }
+    ],
+    "session-cache": [
+      { "method": "GET", "path": "/sessions/:id" },
+      { "method": "PUT", "path": "/sessions/:id" }
+    ],
+    "audit-db": [],
+    "observability": [
+      { "method": "POST", "path": "/logs" },
+      { "method": "POST", "path": "/metrics" },
+      { "method": "GET", "path": "/dashboards" }
+    ]
+  },
+  "analysis": {
+    "source": "ai",
+    "lastAnalyzedAt": "2026-04-15T20:14:00.000Z",
+    "stats": {
+      "services": 9,
+      "endpoints": 22,
+      "flows": 10
+    }
+  }
+}

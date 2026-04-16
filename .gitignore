@@ -1,0 +1,13 @@
+.DS_Store
+__pycache__/
+*.pyc
+*.pyo
+*.log
+
+node_modules/
+dist/
+.tmp/
+tmp/
+
+skills/flow-diagram-ai/starter/dashboard-frontend/node_modules/
+skills/flow-diagram-ai/starter/dashboard-frontend/dist/

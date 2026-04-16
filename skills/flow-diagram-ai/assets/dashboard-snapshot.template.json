@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "meta": {
+    "id": "example-system",
+    "name": "Architecture: Example System",
+    "description": "AI-generated snapshot for FlowChartAI dashboard import.",
+    "systemSlug": "example-system",
+    "status": "analyzed",
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "updatedAt": "2026-01-01T00:00:00.000Z"
+  },
+  "diagrams": [
+    {
+      "id": "example-system",
+      "name": "Architecture: Example System",
+      "desc": "Primary architecture snapshot",
+      "dot": true
+    }
+  ],
+  "layout": {
+    "nodes": [],
+    "connections": []
+  },
+  "endpointsByNode": {},
+  "analysis": {
+    "source": "ai",
+    "lastAnalyzedAt": "2026-01-01T00:00:00.000Z",
+    "stats": {
+      "services": 0,
+      "endpoints": 0,
+      "flows": 0
+    }
+  }
+}

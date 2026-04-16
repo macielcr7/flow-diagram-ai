@@ -1,0 +1,4 @@
+interface:
+  display_name: "Flow Diagram JSON"
+  short_description: "Generate valid dashboard snapshot JSON"
+  default_prompt: "Use $flow-diagram-ai to generate or update a FlowChartAI dashboard snapshot JSON."

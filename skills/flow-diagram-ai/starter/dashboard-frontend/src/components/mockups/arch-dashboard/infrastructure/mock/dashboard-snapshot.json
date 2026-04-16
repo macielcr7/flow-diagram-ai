@@ -1,0 +1,305 @@
+{
+  "version": 1,
+  "meta": {
+    "id": "micro",
+    "name": "Architecture: Microservices",
+    "description": "Primary registered snapshot for the dashboard editor.",
+    "systemSlug": "flow-chart-ai",
+    "status": "analyzed",
+    "createdAt": "2026-04-15T19:00:00.000Z",
+    "updatedAt": "2026-04-15T19:00:00.000Z"
+  },
+  "diagrams": [
+    {
+      "id": "micro",
+      "name": "Architecture: Microservices",
+      "desc": "Primary architecture snapshot",
+      "dot": true
+    }
+  ],
+  "layout": {
+    "nodes": [
+      {
+        "id": "api-gw",
+        "label": "API Gateway",
+        "sublabel": "GATEWAY",
+        "type": "GATEWAY",
+        "tech": "Kong",
+        "x": 38,
+        "y": 185,
+        "w": 162,
+        "h": 92,
+        "ops": ["ROUTE", "AUTH", "RATE LIMIT"]
+      },
+      {
+        "id": "edge-cdn",
+        "label": "Edge CDN",
+        "sublabel": "CDN",
+        "type": "CDN",
+        "tech": "Cloudflare",
+        "x": 38,
+        "y": 58,
+        "w": 168,
+        "h": 92,
+        "ops": ["CACHE", "EDGE"]
+      },
+      {
+        "id": "web-client",
+        "label": "Web Client",
+        "sublabel": "SERVICE",
+        "type": "SERVICE",
+        "tech": "React",
+        "x": 38,
+        "y": 305,
+        "w": 162,
+        "h": 92,
+        "ops": ["VIEW", "INTERACT"]
+      },
+      {
+        "id": "public-lb",
+        "label": "Public Load Balancer",
+        "sublabel": "LOAD_BALANCER",
+        "type": "LOAD_BALANCER",
+        "tech": "NGINX",
+        "x": 38,
+        "y": 470,
+        "w": 168,
+        "h": 92,
+        "ops": ["ROUTE", "BALANCE"]
+      },
+      {
+        "id": "order-svc",
+        "label": "Order Service",
+        "sublabel": "SERVICE",
+        "type": "SERVICE",
+        "tech": "Node.js",
+        "x": 268,
+        "y": 100,
+        "w": 168,
+        "h": 92,
+        "ops": ["SELECT", "INSERT", "UPDATE", "DELETE"]
+      },
+      {
+        "id": "kafka",
+        "label": "Kafka Event Bus",
+        "sublabel": "QUEUE",
+        "type": "QUEUE",
+        "tech": "Kafka",
+        "x": 260,
+        "y": 292,
+        "w": 172,
+        "h": 92,
+        "ops": ["CONSUME", "PRODUCE"]
+      },
+      {
+        "id": "inv-svc",
+        "label": "Inventory Service",
+        "sublabel": "SERVICE",
+        "type": "SERVICE",
+        "tech": "Go",
+        "x": 508,
+        "y": 156,
+        "w": 168,
+        "h": 92,
+        "ops": ["READ", "WRITE", "UPDATE"]
+      },
+      {
+        "id": "auth-idp",
+        "label": "Identity Provider",
+        "sublabel": "AUTH_PROVIDER",
+        "type": "AUTH_PROVIDER",
+        "tech": "Keycloak",
+        "x": 268,
+        "y": 470,
+        "w": 168,
+        "h": 92,
+        "ops": ["LOGIN", "TOKEN"]
+      },
+      {
+        "id": "pay-worker",
+        "label": "Payment Worker",
+        "sublabel": "WORKER",
+        "type": "WORKER",
+        "tech": "Go",
+        "x": 500,
+        "y": 338,
+        "w": 168,
+        "h": 92,
+        "ops": ["SELECT", "INSERT", "UPDATE", "DELETE"]
+      },
+      {
+        "id": "inv-db",
+        "label": "Inventory PostgreSQL DB",
+        "sublabel": "DATABASE",
+        "type": "DATABASE",
+        "tech": "PostgreSQL",
+        "x": 752,
+        "y": 62,
+        "w": 185,
+        "h": 92,
+        "ops": []
+      },
+      {
+        "id": "redis",
+        "label": "Redis Cache",
+        "sublabel": "CACHE",
+        "type": "CACHE",
+        "tech": "Redis",
+        "x": 752,
+        "y": 172,
+        "w": 180,
+        "h": 92,
+        "ops": ["GET", "SET"]
+      },
+      {
+        "id": "object-store",
+        "label": "Object Storage",
+        "sublabel": "OBJECT_STORAGE",
+        "type": "OBJECT_STORAGE",
+        "tech": "S3",
+        "x": 508,
+        "y": 500,
+        "w": 185,
+        "h": 92,
+        "ops": ["PUT", "GET"]
+      },
+      {
+        "id": "stripe",
+        "label": "Stripe API",
+        "sublabel": "EXTERNAL",
+        "type": "EXTERNAL",
+        "tech": "Stripe",
+        "x": 752,
+        "y": 282,
+        "w": 162,
+        "h": 92,
+        "ops": []
+      },
+      {
+        "id": "pay-db",
+        "label": "Payments PostgreSQL DB",
+        "sublabel": "DATABASE",
+        "type": "DATABASE",
+        "tech": "PostgreSQL",
+        "x": 752,
+        "y": 392,
+        "w": 185,
+        "h": 92,
+        "ops": []
+      },
+      {
+        "id": "ord-db",
+        "label": "Orders PostgreSQL DB",
+        "sublabel": "DATABASE",
+        "type": "DATABASE",
+        "tech": "PostgreSQL",
+        "x": 752,
+        "y": 502,
+        "w": 185,
+        "h": 92,
+        "ops": []
+      }
+    ],
+    "connections": [
+      { "id": "c12", "from": "edge-cdn", "to": "web-client", "label": "edge", "dashed": false },
+      { "id": "c1", "from": "web-client", "to": "api-gw", "label": "HTTP", "dashed": false },
+      { "id": "c13", "from": "public-lb", "to": "api-gw", "label": "route", "dashed": false },
+      { "id": "c2", "from": "api-gw", "to": "order-svc", "label": "REST", "dashed": false },
+      { "id": "c3", "from": "api-gw", "to": "inv-svc", "label": "gRPC", "dashed": false },
+      { "id": "c14", "from": "web-client", "to": "auth-idp", "label": "login", "dashed": false },
+      { "id": "c15", "from": "api-gw", "to": "auth-idp", "label": "token", "dashed": false },
+      { "id": "c4", "from": "order-svc", "to": "kafka", "label": "publish", "dashed": false },
+      { "id": "c5", "from": "kafka", "to": "inv-svc", "label": "consume", "dashed": true },
+      { "id": "c6", "from": "kafka", "to": "pay-worker", "label": "consume", "dashed": true },
+      { "id": "c7", "from": "inv-svc", "to": "inv-db", "label": "write", "dashed": false },
+      { "id": "c8", "from": "inv-svc", "to": "redis", "label": "cache", "dashed": true },
+      { "id": "c16", "from": "web-client", "to": "object-store", "label": "assets", "dashed": false },
+      { "id": "c9", "from": "pay-worker", "to": "stripe", "label": "charge", "dashed": false },
+      { "id": "c10", "from": "pay-worker", "to": "pay-db", "label": "write", "dashed": false },
+      { "id": "c11", "from": "order-svc", "to": "ord-db", "label": "write", "dashed": false }
+    ]
+  },
+  "endpointsByNode": {
+    "api-gw": [
+      { "method": "GET", "path": "/health" },
+      { "method": "POST", "path": "/auth/login" },
+      { "method": "POST", "path": "/auth/refresh" },
+      { "method": "GET", "path": "/docs" }
+    ],
+    "edge-cdn": [
+      { "method": "GET", "path": "/assets/*" },
+      { "method": "GET", "path": "/app/*" }
+    ],
+    "web-client": [
+      { "method": "GET", "path": "/" },
+      { "method": "GET", "path": "/dashboard" },
+      { "method": "GET", "path": "/orders" }
+    ],
+    "public-lb": [
+      { "method": "GET", "path": "/" },
+      { "method": "GET", "path": "/api/*" }
+    ],
+    "order-svc": [
+      { "method": "GET", "path": "/orders" },
+      { "method": "GET", "path": "/orders/:id" },
+      { "method": "POST", "path": "/orders" },
+      { "method": "PUT", "path": "/orders/:id" },
+      { "method": "DELETE", "path": "/orders/:id" }
+    ],
+    "kafka": [
+      { "method": "POST", "path": "/events/order.created" },
+      { "method": "POST", "path": "/events/payment.processed" },
+      { "method": "GET", "path": "/topics" }
+    ],
+    "inv-svc": [
+      { "method": "GET", "path": "/inventory" },
+      { "method": "GET", "path": "/inventory/:sku" },
+      { "method": "PUT", "path": "/inventory/:sku" },
+      { "method": "PATCH", "path": "/inventory/bulk" }
+    ],
+    "auth-idp": [
+      { "method": "GET", "path": "/oauth/authorize" },
+      { "method": "POST", "path": "/oauth/token" }
+    ],
+    "pay-worker": [
+      { "method": "POST", "path": "/payments/process" },
+      { "method": "GET", "path": "/payments/:id" },
+      { "method": "POST", "path": "/payments/refund" }
+    ],
+    "inv-db": [
+      { "method": "GET", "path": "/query" },
+      { "method": "POST", "path": "/insert" }
+    ],
+    "redis": [
+      { "method": "GET", "path": "/cache/:key" },
+      { "method": "POST", "path": "/cache/:key" },
+      { "method": "DELETE", "path": "/cache/:key" }
+    ],
+    "object-store": [
+      { "method": "GET", "path": "/files/:key" },
+      { "method": "POST", "path": "/uploads" }
+    ],
+    "stripe": [
+      { "method": "POST", "path": "/v1/charges" },
+      { "method": "POST", "path": "/v1/refunds" },
+      { "method": "GET", "path": "/v1/charges/:id" }
+    ],
+    "pay-db": [
+      { "method": "GET", "path": "/query" },
+      { "method": "POST", "path": "/insert" }
+    ],
+    "ord-db": [
+      { "method": "GET", "path": "/query" },
+      { "method": "POST", "path": "/insert" }
+    ]
+  },
+  "analysis": {
+    "source": "mock",
+    "lastAnalyzedAt": "2026-04-15T19:00:00.000Z",
+    "stats": {
+      "services": 15,
+      "endpoints": 42,
+      "flows": 16
+    }
+  }
+}

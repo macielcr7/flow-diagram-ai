@@ -1,0 +1,196 @@
+{
+  "version": 1,
+  "meta": {
+    "id": "queue-worker-media",
+    "name": "Architecture: Queue Worker Media",
+    "description": "Media ingestion pipeline with queue, worker, object storage, search indexing, and notifications.",
+    "systemSlug": "queue-worker-media",
+    "status": "analyzed",
+    "createdAt": "2026-04-15T20:12:00.000Z",
+    "updatedAt": "2026-04-15T20:12:00.000Z"
+  },
+  "diagrams": [
+    {
+      "id": "queue-worker-media",
+      "name": "Architecture: Queue Worker Media",
+      "desc": "Primary architecture snapshot",
+      "dot": true
+    }
+  ],
+  "layout": {
+    "nodes": [
+      {
+        "id": "creator-studio",
+        "label": "Creator Studio",
+        "sublabel": "SERVICE",
+        "type": "SERVICE",
+        "tech": "React",
+        "x": 40,
+        "y": 126,
+        "w": 168,
+        "h": 92,
+        "ops": ["UPLOAD", "PREVIEW"]
+      },
+      {
+        "id": "media-api",
+        "label": "Media API Gateway",
+        "sublabel": "GATEWAY",
+        "type": "GATEWAY",
+        "tech": "Kong",
+        "x": 40,
+        "y": 286,
+        "w": 168,
+        "h": 92,
+        "ops": ["ROUTE", "AUTH"]
+      },
+      {
+        "id": "upload-service",
+        "label": "Upload Service",
+        "sublabel": "SERVICE",
+        "type": "SERVICE",
+        "tech": "NestJS",
+        "x": 296,
+        "y": 126,
+        "w": 168,
+        "h": 92,
+        "ops": ["CREATE", "SIGN", "VALIDATE"]
+      },
+      {
+        "id": "jobs-queue",
+        "label": "Media Jobs Queue",
+        "sublabel": "QUEUE",
+        "type": "QUEUE",
+        "tech": "RabbitMQ",
+        "x": 296,
+        "y": 286,
+        "w": 172,
+        "h": 92,
+        "ops": ["PUBLISH", "CONSUME"]
+      },
+      {
+        "id": "media-worker",
+        "label": "Media Worker",
+        "sublabel": "WORKER",
+        "type": "WORKER",
+        "tech": "Go",
+        "x": 544,
+        "y": 286,
+        "w": 168,
+        "h": 92,
+        "ops": ["TRANSCODE", "INDEX"]
+      },
+      {
+        "id": "object-storage",
+        "label": "Object Storage",
+        "sublabel": "OBJECT_STORAGE",
+        "type": "OBJECT_STORAGE",
+        "tech": "S3",
+        "x": 804,
+        "y": 124,
+        "w": 185,
+        "h": 92,
+        "ops": ["PUT", "GET"]
+      },
+      {
+        "id": "search-engine",
+        "label": "Search Engine",
+        "sublabel": "SEARCH_ENGINE",
+        "type": "SEARCH_ENGINE",
+        "tech": "OpenSearch",
+        "x": 804,
+        "y": 258,
+        "w": 168,
+        "h": 92,
+        "ops": ["INDEX", "QUERY"]
+      },
+      {
+        "id": "email-gateway",
+        "label": "Email Gateway",
+        "sublabel": "EMAIL_GATEWAY",
+        "type": "EMAIL_GATEWAY",
+        "tech": "Postmark",
+        "x": 804,
+        "y": 392,
+        "w": 168,
+        "h": 92,
+        "ops": ["SEND", "TEMPLATE"]
+      },
+      {
+        "id": "observability",
+        "label": "Observability",
+        "sublabel": "OBSERVABILITY",
+        "type": "OBSERVABILITY",
+        "tech": "Datadog",
+        "x": 544,
+        "y": 430,
+        "w": 168,
+        "h": 92,
+        "ops": ["TRACE", "ALERT"]
+      }
+    ],
+    "connections": [
+      { "id": "c1", "from": "creator-studio", "to": "media-api", "label": "HTTP", "dashed": false },
+      { "id": "c2", "from": "media-api", "to": "upload-service", "label": "REST", "dashed": false },
+      { "id": "c3", "from": "upload-service", "to": "jobs-queue", "label": "publish", "dashed": false },
+      { "id": "c4", "from": "jobs-queue", "to": "media-worker", "label": "consume", "dashed": true },
+      { "id": "c5", "from": "media-worker", "to": "object-storage", "label": "files", "dashed": false },
+      { "id": "c6", "from": "media-worker", "to": "search-engine", "label": "index", "dashed": false },
+      { "id": "c7", "from": "media-worker", "to": "email-gateway", "label": "notify", "dashed": false },
+      { "id": "c8", "from": "upload-service", "to": "object-storage", "label": "presign", "dashed": false },
+      { "id": "c9", "from": "upload-service", "to": "observability", "label": "metrics", "dashed": true },
+      { "id": "c10", "from": "media-worker", "to": "observability", "label": "traces", "dashed": true }
+    ]
+  },
+  "endpointsByNode": {
+    "creator-studio": [
+      { "method": "GET", "path": "/" },
+      { "method": "GET", "path": "/library" },
+      { "method": "GET", "path": "/uploads/new" }
+    ],
+    "media-api": [
+      { "method": "GET", "path": "/health" },
+      { "method": "POST", "path": "/uploads" },
+      { "method": "GET", "path": "/uploads/:id" }
+    ],
+    "upload-service": [
+      { "method": "POST", "path": "/uploads" },
+      { "method": "GET", "path": "/uploads/:id" },
+      { "method": "POST", "path": "/uploads/:id/complete" },
+      { "method": "POST", "path": "/uploads/:id/presign" }
+    ],
+    "jobs-queue": [
+      { "method": "POST", "path": "/events/media.uploaded" },
+      { "method": "GET", "path": "/topics/media.jobs" }
+    ],
+    "media-worker": [
+      { "method": "POST", "path": "/jobs/transcode" },
+      { "method": "POST", "path": "/jobs/index" }
+    ],
+    "object-storage": [
+      { "method": "GET", "path": "/files/:key" },
+      { "method": "POST", "path": "/uploads" }
+    ],
+    "search-engine": [
+      { "method": "POST", "path": "/index/media" },
+      { "method": "GET", "path": "/search" }
+    ],
+    "email-gateway": [
+      { "method": "POST", "path": "/messages/rendered" },
+      { "method": "POST", "path": "/messages/send" }
+    ],
+    "observability": [
+      { "method": "POST", "path": "/logs" },
+      { "method": "POST", "path": "/metrics" },
+      { "method": "GET", "path": "/alerts" }
+    ]
+  },
+  "analysis": {
+    "source": "ai",
+    "lastAnalyzedAt": "2026-04-15T20:12:00.000Z",
+    "stats": {
+      "services": 9,
+      "endpoints": 23,
+      "flows": 10
+    }
+  }
+}

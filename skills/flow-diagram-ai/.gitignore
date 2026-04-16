@@ -1,0 +1,13 @@
+.DS_Store
+__pycache__/
+*.pyc
+*.pyo
+*.log
+
+*/node_modules/
+*/dist/
+.tmp/
+tmp/
+
+starter/dashboard-frontend/node_modules/
+starter/dashboard-frontend/dist/

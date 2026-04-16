@@ -1,0 +1,175 @@
+{
+  "version": 1,
+  "meta": {
+    "id": "monolith-crm",
+    "name": "Architecture: Monolith CRM",
+    "description": "Single-application CRM with cache, email delivery, feature flags, and observability.",
+    "systemSlug": "monolith-crm",
+    "status": "analyzed",
+    "createdAt": "2026-04-15T20:10:00.000Z",
+    "updatedAt": "2026-04-15T20:10:00.000Z"
+  },
+  "diagrams": [
+    {
+      "id": "monolith-crm",
+      "name": "Architecture: Monolith CRM",
+      "desc": "Primary architecture snapshot",
+      "dot": true
+    }
+  ],
+  "layout": {
+    "nodes": [
+      {
+        "id": "edge-cdn",
+        "label": "Edge CDN",
+        "sublabel": "CDN",
+        "type": "CDN",
+        "tech": "Cloudflare",
+        "x": 40,
+        "y": 74,
+        "w": 168,
+        "h": 92,
+        "ops": ["CACHE", "EDGE"]
+      },
+      {
+        "id": "web-app",
+        "label": "CRM Web App",
+        "sublabel": "SERVICE",
+        "type": "SERVICE",
+        "tech": "Next.js",
+        "x": 40,
+        "y": 230,
+        "w": 168,
+        "h": 92,
+        "ops": ["VIEW", "INTERACT"]
+      },
+      {
+        "id": "crm-monolith",
+        "label": "CRM Monolith",
+        "sublabel": "SERVICE",
+        "type": "SERVICE",
+        "tech": "Laravel",
+        "x": 290,
+        "y": 230,
+        "w": 168,
+        "h": 92,
+        "ops": ["READ", "WRITE", "AUTH", "BILLING"]
+      },
+      {
+        "id": "feature-flags",
+        "label": "Feature Flags",
+        "sublabel": "FEATURE_FLAGS",
+        "type": "FEATURE_FLAGS",
+        "tech": "Unleash",
+        "x": 290,
+        "y": 74,
+        "w": 168,
+        "h": 92,
+        "ops": ["READ", "TARGET"]
+      },
+      {
+        "id": "observability",
+        "label": "Observability",
+        "sublabel": "OBSERVABILITY",
+        "type": "OBSERVABILITY",
+        "tech": "Grafana",
+        "x": 290,
+        "y": 386,
+        "w": 168,
+        "h": 92,
+        "ops": ["METRICS", "ALERT"]
+      },
+      {
+        "id": "crm-db",
+        "label": "CRM PostgreSQL",
+        "sublabel": "DATABASE",
+        "type": "DATABASE",
+        "tech": "PostgreSQL",
+        "x": 560,
+        "y": 142,
+        "w": 185,
+        "h": 92,
+        "ops": []
+      },
+      {
+        "id": "redis-cache",
+        "label": "Redis Cache",
+        "sublabel": "CACHE",
+        "type": "CACHE",
+        "tech": "Redis",
+        "x": 560,
+        "y": 260,
+        "w": 180,
+        "h": 92,
+        "ops": ["GET", "SET"]
+      },
+      {
+        "id": "email-gateway",
+        "label": "Email Gateway",
+        "sublabel": "EMAIL_GATEWAY",
+        "type": "EMAIL_GATEWAY",
+        "tech": "SES",
+        "x": 560,
+        "y": 386,
+        "w": 168,
+        "h": 92,
+        "ops": ["SEND", "TEMPLATE"]
+      }
+    ],
+    "connections": [
+      { "id": "c1", "from": "edge-cdn", "to": "web-app", "label": "edge", "dashed": false },
+      { "id": "c2", "from": "web-app", "to": "crm-monolith", "label": "HTTP", "dashed": false },
+      { "id": "c3", "from": "crm-monolith", "to": "feature-flags", "label": "flags", "dashed": false },
+      { "id": "c4", "from": "crm-monolith", "to": "crm-db", "label": "write", "dashed": false },
+      { "id": "c5", "from": "crm-monolith", "to": "redis-cache", "label": "cache", "dashed": true },
+      { "id": "c6", "from": "crm-monolith", "to": "email-gateway", "label": "notify", "dashed": false },
+      { "id": "c7", "from": "crm-monolith", "to": "observability", "label": "metrics", "dashed": true },
+      { "id": "c8", "from": "web-app", "to": "observability", "label": "rum", "dashed": true }
+    ]
+  },
+  "endpointsByNode": {
+    "edge-cdn": [
+      { "method": "GET", "path": "/app/*" },
+      { "method": "GET", "path": "/assets/*" }
+    ],
+    "web-app": [
+      { "method": "GET", "path": "/" },
+      { "method": "GET", "path": "/customers" },
+      { "method": "GET", "path": "/deals" }
+    ],
+    "crm-monolith": [
+      { "method": "GET", "path": "/api/customers" },
+      { "method": "POST", "path": "/api/customers" },
+      { "method": "GET", "path": "/api/deals" },
+      { "method": "POST", "path": "/api/deals" },
+      { "method": "POST", "path": "/api/auth/login" }
+    ],
+    "feature-flags": [
+      { "method": "GET", "path": "/flags" },
+      { "method": "POST", "path": "/flags/evaluate" }
+    ],
+    "observability": [
+      { "method": "POST", "path": "/ingest/logs" },
+      { "method": "POST", "path": "/ingest/metrics" },
+      { "method": "GET", "path": "/dashboards" }
+    ],
+    "crm-db": [],
+    "redis-cache": [
+      { "method": "GET", "path": "/cache/:key" },
+      { "method": "PUT", "path": "/cache/:key" }
+    ],
+    "email-gateway": [
+      { "method": "POST", "path": "/messages/send" },
+      { "method": "GET", "path": "/templates" }
+    ]
+  },
+  "analysis": {
+    "source": "ai",
+    "lastAnalyzedAt": "2026-04-15T20:10:00.000Z",
+    "stats": {
+      "services": 8,
+      "endpoints": 19,
+      "flows": 8
+    }
+  }
+}
