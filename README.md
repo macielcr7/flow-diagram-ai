@@ -1,41 +1,43 @@
 # flow diagram AI Skill
 
-Repositório público da skill `flow-diagram-ai` para Codex.
+Public repository for the `flow-diagram-ai` skill for Codex.
 
-Essa skill foi criada para transformar descrição de arquitetura, análise de projeto ou JSON parcial em um snapshot válido para o dashboard do FlowChartAI. O resultado pode ser:
+Portuguese version: [README-PT-BR.md](./README-PT-BR.md)
 
-- apenas o JSON final do diagrama;
-- ou um projeto frontend já materializado com o dashboard pronto para abrir e editar.
+This skill was created to turn architecture descriptions, project analysis, or partial JSON into a valid snapshot for the FlowChartAI dashboard. The output can be:
 
-## O que a skill resolve
+- only the final diagram JSON;
+- or a frontend project already materialized with a dashboard ready to open and edit.
 
-O problema principal aqui não é só desenhar caixas e setas. O objetivo é produzir um contrato consistente entre:
+## What this skill solves
 
-- componentes da arquitetura;
-- conexões entre esses componentes;
-- endpoints expostos por cada elemento;
-- metadados e estatísticas de análise;
-- layout visual importável no editor.
+The core problem here is not only drawing boxes and arrows. The goal is to produce a consistent contract between:
 
-A skill centraliza esse fluxo e evita que cada geração de diagrama invente um formato diferente.
+- architecture components;
+- connections between those components;
+- endpoints exposed by each element;
+- metadata and analysis statistics;
+- visual layout importable in the editor.
 
-## Como o dashboard funciona
+This skill centralizes that flow and prevents each diagram generation from inventing a different format.
 
-O dashboard é um editor visual orientado a snapshot JSON. Ele não depende de backend para o fluxo principal e funciona como uma área de trabalho para montar, revisar e exportar diagramas de arquitetura.
+## How the dashboard works
 
-### Estrutura da interface
+The dashboard is a visual editor driven by a snapshot JSON. It does not depend on a backend for the main flow and works as a workspace to build, review, and export architecture diagrams.
 
-O dashboard é dividido em quatro áreas principais:
+### Interface structure
+
+The dashboard is split into four main areas:
 
 1. `Top bar`
-   Mostra o status do snapshot, totais de serviços, endpoints e fluxos, além das ações principais:
+   Shows snapshot status, totals for services, endpoints, and flows, plus the main actions:
    - `Snapshots`
    - `Load Example`
    - `Edit JSON`
    - `Analyze Snapshot`
 
 2. `Left sidebar`
-   Funciona como paleta de componentes. Os tipos podem ser arrastados para o canvas:
+   Works as a component palette. Types can be dragged onto the canvas:
    - `Service`
    - `Database`
    - `Queue`
@@ -52,99 +54,99 @@ O dashboard é dividido em quatro áreas principais:
    - `Search Engine`
    - `Email Gateway`
 
-3. `Canvas central`
-   É o diagrama em si. Nele você pode:
-   - mover componentes;
-   - arrastar novos componentes para o canvas;
-   - criar conexões arrastando a seta do card;
-   - selecionar conexões com um clique;
-   - editar um componente com duplo clique;
-   - editar uma conexão clicando na linha;
-   - reposicionar manualmente a rota da conexão pelo handle central;
-   - navegar com zoom, pan e mini-map.
+3. `Central canvas`
+   This is the diagram itself. You can:
+   - move components;
+   - drag new components onto the canvas;
+   - create connections by dragging the arrow from a card;
+   - select connections with a single click;
+   - edit a component with double-click;
+   - edit a connection by clicking on the line;
+   - manually reposition a connection route through the center handle;
+   - navigate with zoom, pan, and mini-map.
 
 4. `Inspector`
-   Painel contextual à direita. Ele muda de acordo com a seleção atual:
-   - quando um componente está selecionado, mostra endpoints, fluxos relacionados e ações do nó;
-   - quando nenhuma seleção está ativa, funciona como visão geral de endpoints e configurações;
-   - quando uma conexão está selecionada, abre sua edição;
-   - também concentra configurações de modo e animação.
+   Context panel on the right. It changes according to the current selection:
+   - when a component is selected, it shows endpoints, related flows, and node actions;
+   - when nothing is selected, it works as an overview of endpoints and settings;
+   - when a connection is selected, it opens connection editing;
+   - it also concentrates mode and animation settings.
 
-## Como o diagrama funciona
+## How the diagram works
 
-O diagrama é persistido em um snapshot JSON com um contrato fixo. Em termos práticos, ele é composto por estes blocos:
+The diagram is persisted as a snapshot JSON with a fixed contract. In practice, it is composed of these blocks:
 
 - `meta`
-  Identidade do snapshot, nome, descrição, timestamps e status.
+  Snapshot identity, name, description, timestamps, and status.
 
 - `diagrams`
-  Lista dos diagramas disponíveis. O fluxo atual trabalha, na prática, com um diagrama principal.
+  List of available diagrams. In practice, the current flow works with one main diagram.
 
 - `layout.nodes`
-  Componentes visuais do canvas.
+  Visual components on the canvas.
 
 - `layout.connections`
-  Ligações direcionais entre componentes.
+  Directional links between components.
 
 - `endpointsByNode`
-  Endpoints associados a cada componente.
+  Endpoints associated with each component.
 
 - `analysis`
-  Fonte da análise, timestamp da última execução e estatísticas agregadas.
+  Analysis source, last execution timestamp, and aggregated statistics.
 
-### Modelo mental do editor
+### Editor mental model
 
-O dashboard trata o diagrama como uma combinação de:
+The dashboard treats the diagram as a combination of:
 
-- semântica de arquitetura;
-- estrutura visual;
-- inspeção operacional.
+- architecture semantics;
+- visual structure;
+- operational inspection.
 
-Cada card não é apenas um bloco visual. Ele representa um elemento do sistema com:
+Each card is not just a visual block. It represents a system element with:
 
-- tipo;
-- tecnologia;
-- operações resumidas;
-- endpoints associados;
-- relações de entrada e saída.
+- type;
+- technology;
+- summarized operations;
+- associated endpoints;
+- incoming and outgoing relationships.
 
-Cada conexão também não é apenas uma linha. Ela representa um fluxo direcionado entre componentes, com:
+Each connection is also not just a line. It represents a directed flow between components, with:
 
-- origem e destino;
-- rótulo curto;
-- comportamento síncrono ou assíncrono;
-- rota automática ou manual.
+- source and target;
+- short label;
+- synchronous or asynchronous behavior;
+- automatic or manual routing.
 
-### Comportamento visual das conexões
+### Visual behavior of connections
 
-Quando um componente é selecionado:
+When a component is selected:
 
-- fluxos `incoming` recebem destaque em uma cor;
-- fluxos `outgoing` recebem destaque em outra cor;
-- cards relacionados permanecem em evidência;
-- elementos sem vínculo ficam com opacidade reduzida.
+- `incoming` flows are highlighted in one color;
+- `outgoing` flows are highlighted in another color;
+- related cards stay emphasized;
+- unrelated elements have reduced opacity.
 
-Isso permite ler o contexto do componente sem perder a visão do sistema inteiro.
+This lets you read component context without losing sight of the whole system.
 
-### Rota manual das linhas
+### Manual line routing
 
-As conexões usam rota ortogonal por padrão. Quando necessário, a linha pode ser ajustada manualmente:
+Connections use orthogonal routing by default. When needed, the line can be manually adjusted:
 
-- selecione a conexão;
-- clique e segure o handle central;
-- arraste para reposicionar o segmento principal;
-- o valor passa a ser salvo em `routing`;
-- `Reset route` retorna a conexão ao modo automático.
+- select the connection;
+- click and hold the center handle;
+- drag to reposition the main segment;
+- the value is then saved in `routing`;
+- `Reset route` returns the connection to automatic mode.
 
-Esse detalhe é importante porque o editor não gera apenas um JSON válido; ele também preserva decisões de legibilidade do layout.
+This detail matters because the editor does not only generate valid JSON; it also preserves layout readability decisions.
 
-## Modos de uso da skill
+## Skill usage modes
 
 ### 1. JSON-only
 
-Use quando você quer apenas o snapshot final.
+Use when you only want the final snapshot.
 
-Exemplo:
+Example:
 
 ```text
 Use flow-diagram-ai to generate a diagram snapshot for a microservices e-commerce platform.
@@ -152,36 +154,36 @@ Use flow-diagram-ai to generate a diagram snapshot for a microservices e-commerc
 
 ### 2. Ready-project
 
-Use quando você quer um projeto pronto para abrir localmente.
+Use when you want a project ready to open locally.
 
-Exemplo:
+Example:
 
 ```text
-Use flow-diagram-ai para gerar um diagrama da infraestrutura de todo o projeto em uma pasta flow-diagram.
+Use flow-diagram-ai to generate an infrastructure diagram for the entire project in a folder named flow-diagram.
 ```
 
-Nesse modo, a skill deve:
+In this mode, the skill should:
 
-- gerar o snapshot JSON;
-- copiar o starter do dashboard;
-- gravar o snapshot no caminho padrão consumido pela interface;
-- opcionalmente instalar dependências e validar o build.
+- generate the snapshot JSON;
+- copy the dashboard starter;
+- write the snapshot to the default path consumed by the interface;
+- optionally install dependencies and validate the build.
 
 ### 3. Repair / Normalize
 
-Use quando já existe um JSON e você quer corrigir ou expandir sem quebrar o contrato.
+Use when a JSON already exists and you want to fix or expand it without breaking the contract.
 
-Exemplo:
+Example:
 
 ```text
 Use flow-diagram-ai to fix this invalid snapshot and keep the same architecture.
 ```
 
-## Estrutura do repositório
+## Repository structure
 
 ```text
 .
-├── assets/                              # imagens usadas no README
+├── assets/                              # images used in the README
 ├── skills/
 │   └── flow-diagram-ai/
 │       ├── SKILL.md
@@ -191,113 +193,114 @@ Use flow-diagram-ai to fix this invalid snapshot and keep the same architecture.
 │       ├── references/
 │       ├── scripts/
 │       └── starter/dashboard-frontend/
-└── README.md
+├── README.md
+└── README-PT-BR.md
 ```
 
-## Instalação
+## Installation
 
-Copie a skill para a pasta de skills do Codex:
+Copy the skill to the Codex skills folder:
 
 ```bash
 mkdir -p ~/.codex/skills
 cp -R skills/flow-diagram-ai ~/.codex/skills/flow-diagram-ai
 ```
 
-Depois disso, a skill pode ser chamada pelo identificador `flow-diagram-ai`.
+After that, the skill can be called by the identifier `flow-diagram-ai`.
 
-## Conteúdo principal da skill
+## Main skill contents
 
-Dentro de [skills/flow-diagram-ai](/Users/macielcr7/Desktop/dev/maciel/Flow-Chart-AI/skills/flow-diagram-ai):
+Inside [skills/flow-diagram-ai](/Users/macielcr7/Desktop/dev/maciel/Flow-Chart-AI/skills/flow-diagram-ai):
 
 - [SKILL.md](/Users/macielcr7/Desktop/dev/maciel/Flow-Chart-AI/skills/flow-diagram-ai/SKILL.md)
-  Regras de execução, modos de uso e fluxo principal.
+  Execution rules, usage modes, and main flow.
 
 - [references/snapshot-spec.md](/Users/macielcr7/Desktop/dev/maciel/Flow-Chart-AI/skills/flow-diagram-ai/references/snapshot-spec.md)
-  Contrato formal do snapshot JSON.
+  Formal snapshot JSON contract.
 
 - [references/import-checklist.md](/Users/macielcr7/Desktop/dev/maciel/Flow-Chart-AI/skills/flow-diagram-ai/references/import-checklist.md)
-  Checklist para evitar falhas de importação.
+  Checklist to avoid import failures.
 
 - [examples](/Users/macielcr7/Desktop/dev/maciel/Flow-Chart-AI/skills/flow-diagram-ai/examples)
-  Biblioteca de snapshots válidos para cenários reais.
+  Library of valid snapshots for real-world scenarios.
 
 - [scripts/validate_snapshot.py](/Users/macielcr7/Desktop/dev/maciel/Flow-Chart-AI/skills/flow-diagram-ai/scripts/validate_snapshot.py)
-  Validador do contrato JSON.
+  JSON contract validator.
 
 - [scripts/materialize_starter.py](/Users/macielcr7/Desktop/dev/maciel/Flow-Chart-AI/skills/flow-diagram-ai/scripts/materialize_starter.py)
-  Script que materializa o projeto frontend com o snapshot injetado.
+  Script that materializes the frontend project with the injected snapshot.
 
 - [starter/dashboard-frontend](/Users/macielcr7/Desktop/dev/maciel/Flow-Chart-AI/skills/flow-diagram-ai/starter/dashboard-frontend)
-  Starter do dashboard, pronto para uso local.
+  Dashboard starter, ready for local use.
 
-## Validação
+## Validation
 
-Smoke test completo:
+Full smoke test:
 
 ```bash
 python3 skills/flow-diagram-ai/scripts/smoke_test.py
 ```
 
-Validação de um snapshot específico:
+Validation for a specific snapshot:
 
 ```bash
 python3 skills/flow-diagram-ai/scripts/validate_snapshot.py path/to/file.json
 ```
 
-## Leitura dos exemplos visuais
+## Reading the visual examples
 
-### Exemplo 1: visão operacional de um gateway selecionado
+### Example 1: operational view of a selected gateway
 
 ![Example 1](./assets/example1.png)
 
-Esta imagem mostra bem a leitura operacional do dashboard:
+This image shows the dashboard's operational reading clearly:
 
-- à esquerda, a paleta de componentes disponíveis para arrastar ao canvas;
-- no centro, um sistema distribuído com múltiplos serviços, banco, storage, fila e observabilidade;
-- à direita, o inspector focado no `vms-gateway`.
+- on the left, the component palette available to drag onto the canvas;
+- in the center, a distributed system with multiple services, database, storage, queue, and observability;
+- on the right, the inspector focused on `vms-gateway`.
 
-O ponto mais importante aqui é que o painel lateral não mostra apenas os dados do card. Ele expõe:
+The most important point here is that the side panel does not only show card data. It exposes:
 
-- endpoints do componente selecionado;
-- fluxos de entrada e saída;
-- ações rápidas como editar, duplicar, centralizar e remover.
+- endpoints for the selected component;
+- incoming and outgoing flows;
+- quick actions such as edit, duplicate, center, and remove.
 
-É a visão mais próxima de “inspeção de um nó”.
+This is the closest view to "node inspection".
 
-### Exemplo 2: visão sistêmica do diagrama completo
+### Example 2: system-wide view of the full diagram
 
 ![Example 2](./assets/example2.png)
 
-Nesta imagem, o foco está menos em um componente específico e mais no sistema como conjunto:
+In this image, the focus is less on a specific component and more on the system as a whole:
 
-- o canvas mostra a topologia completa;
-- o mini-map ajuda a navegar em diagramas maiores;
-- o inspector opera como catálogo de endpoints;
-- a barra superior resume o estado do snapshot e o volume do sistema analisado.
+- the canvas shows the full topology;
+- the mini-map helps navigate larger diagrams;
+- the inspector acts as an endpoint catalog;
+- the top bar summarizes snapshot status and the analyzed system volume.
 
-É a melhor imagem para entender que o editor não é um canvas solto. Ele também funciona como console de leitura da arquitetura.
+This is the best image to understand that the editor is not a loose canvas. It also works as an architecture reading console.
 
-### Exemplo 3: leitura contextual de relacionamentos
+### Example 3: contextual relationship reading
 
 ![Example 3](./assets/example3.png)
 
-Esta imagem evidencia o comportamento contextual da seleção:
+This image highlights the contextual selection behavior:
 
-- um componente está em foco;
-- fluxos relacionados ficam destacados;
-- elementos sem vínculo visual com a seleção ficam atenuados;
-- o inspector acompanha o nó ativo e mostra seus relacionamentos.
+- one component is in focus;
+- related flows are highlighted;
+- elements with no visual link to the selection are dimmed;
+- the inspector follows the active node and shows its relationships.
 
-Esse comportamento melhora muito a leitura de grafos médios e grandes, porque reduz ruído visual sem esconder o restante da arquitetura.
+This behavior greatly improves reading medium and large graphs because it reduces visual noise without hiding the rest of the architecture.
 
-## Resumo
+## Summary
 
-Esta skill existe para fechar um fluxo completo:
+This skill exists to close a complete flow:
 
-1. entender uma arquitetura;
-2. transformar isso em um snapshot consistente;
-3. validar o contrato;
-4. abrir esse resultado em um dashboard visual utilizável;
-5. continuar a edição no canvas ou no JSON bruto.
+1. understand an architecture;
+2. turn it into a consistent snapshot;
+3. validate the contract;
+4. open this output in a usable visual dashboard;
+5. continue editing on the canvas or in raw JSON.
 
-O valor real não está apenas em “gerar um JSON”, mas em manter o JSON, o editor e o starter funcionando como uma única ferramenta de trabalho.
+The real value is not only "generating a JSON", but keeping JSON, editor, and starter working as one single tool.
