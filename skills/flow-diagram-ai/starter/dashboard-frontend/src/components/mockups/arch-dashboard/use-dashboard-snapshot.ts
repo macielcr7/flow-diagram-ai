@@ -19,6 +19,7 @@ import {
 } from "./infrastructure/examples/dashboard-example-catalog";
 import {
   clearDashboardWorkspaceFromStorage,
+  createDashboardWorkspaceStorageScope,
   loadDashboardWorkspaceFromStorage,
   saveDashboardWorkspaceToStorage,
   type DashboardWorkspaceSnapshotRecord,
@@ -197,13 +198,17 @@ export function useDashboardSnapshot() {
     () => getRegisteredMockDashboardSnapshot(),
     [],
   );
+  const workspaceStorageScope = useMemo(
+    () => createDashboardWorkspaceStorageScope(registeredSnapshot),
+    [registeredSnapshot],
+  );
   const exampleCatalog = useMemo<DashboardExampleCatalogItem[]>(
     () => getDashboardExampleCatalog(),
     [],
   );
   const [workspace, setWorkspace] = useState<DashboardWorkspaceStorage>(
     () =>
-      loadDashboardWorkspaceFromStorage() ??
+      loadDashboardWorkspaceFromStorage(workspaceStorageScope) ??
       createWorkspaceFromSnapshot(registeredSnapshot),
   );
   const currentSnapshotRecord = useMemo(
@@ -225,8 +230,8 @@ export function useDashboardSnapshot() {
   const [jsonFeedback, setJsonFeedback] = useState<SnapshotFeedback | null>(null);
 
   useEffect(() => {
-    saveDashboardWorkspaceToStorage(workspace);
-  }, [workspace]);
+    saveDashboardWorkspaceToStorage(workspace, workspaceStorageScope);
+  }, [workspace, workspaceStorageScope]);
 
   const syncJsonDraftToSnapshot = (
     nextSnapshot: DashboardSnapshot,
@@ -576,7 +581,7 @@ export function useDashboardSnapshot() {
   };
 
   const resetWorkspaceStorage = () => {
-    clearDashboardWorkspaceFromStorage();
+    clearDashboardWorkspaceFromStorage(workspaceStorageScope);
     const nextWorkspace = createWorkspaceFromSnapshot(registeredSnapshot);
     const nextRecord = ensureCurrentSnapshotRecord(nextWorkspace);
 

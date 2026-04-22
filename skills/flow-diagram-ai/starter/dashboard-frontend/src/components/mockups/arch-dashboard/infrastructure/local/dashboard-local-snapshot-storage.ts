@@ -32,6 +32,24 @@ type PersistedWorkspace = {
   snapshots: PersistedWorkspaceSnapshotRecord[];
 };
 
+function encodeStorageScope(storageScope: string): string {
+  return encodeURIComponent(storageScope.trim());
+}
+
+function getWorkspaceStorageKey(storageScope?: string): string {
+  if (!storageScope) {
+    return DASHBOARD_WORKSPACE_STORAGE_KEY;
+  }
+
+  return `${DASHBOARD_WORKSPACE_STORAGE_KEY}.${encodeStorageScope(storageScope)}`;
+}
+
+export function createDashboardWorkspaceStorageScope(
+  snapshot: Pick<DashboardSnapshot, "meta">,
+): string {
+  return `${snapshot.meta.systemSlug}:${snapshot.meta.createdAt}`;
+}
+
 function isBrowser(): boolean {
   return typeof window !== "undefined";
 }
@@ -100,7 +118,9 @@ function loadLegacySnapshotFromStorage(): DashboardWorkspaceStorage | null {
   }
 }
 
-export function loadDashboardWorkspaceFromStorage():
+export function loadDashboardWorkspaceFromStorage(
+  storageScope?: string,
+):
   | DashboardWorkspaceStorage
   | null {
   if (!isBrowser()) {
@@ -108,10 +128,14 @@ export function loadDashboardWorkspaceFromStorage():
   }
 
   const rawWorkspace = window.localStorage.getItem(
-    DASHBOARD_WORKSPACE_STORAGE_KEY,
+    getWorkspaceStorageKey(storageScope),
   );
 
   if (!rawWorkspace) {
+    if (storageScope) {
+      return null;
+    }
+
     return loadLegacySnapshotFromStorage();
   }
 
@@ -122,6 +146,10 @@ export function loadDashboardWorkspaceFromStorage():
       !Array.isArray(parsedWorkspace.snapshots) ||
       typeof parsedWorkspace.currentSnapshotId !== "string"
     ) {
+      if (storageScope) {
+        return null;
+      }
+
       return loadLegacySnapshotFromStorage();
     }
 
@@ -134,12 +162,17 @@ export function loadDashboardWorkspaceFromStorage():
       snapshots,
     });
   } catch {
+    if (storageScope) {
+      return null;
+    }
+
     return loadLegacySnapshotFromStorage();
   }
 }
 
 export function saveDashboardWorkspaceToStorage(
   workspace: DashboardWorkspaceStorage,
+  storageScope?: string,
 ): void {
   if (!isBrowser()) {
     return;
@@ -147,7 +180,7 @@ export function saveDashboardWorkspaceToStorage(
 
   const normalizedWorkspace = normalizeWorkspace(workspace);
   if (!normalizedWorkspace) {
-    clearDashboardWorkspaceFromStorage();
+    clearDashboardWorkspaceFromStorage(storageScope);
     return;
   }
 
@@ -158,17 +191,22 @@ export function saveDashboardWorkspaceToStorage(
   };
 
   window.localStorage.setItem(
-    DASHBOARD_WORKSPACE_STORAGE_KEY,
+    getWorkspaceStorageKey(storageScope),
     JSON.stringify(persistedWorkspace),
   );
-  window.localStorage.removeItem(LEGACY_SNAPSHOT_STORAGE_KEY);
+  if (!storageScope) {
+    window.localStorage.removeItem(LEGACY_SNAPSHOT_STORAGE_KEY);
+  }
 }
 
-export function clearDashboardWorkspaceFromStorage(): void {
+export function clearDashboardWorkspaceFromStorage(storageScope?: string): void {
   if (!isBrowser()) {
     return;
   }
 
-  window.localStorage.removeItem(DASHBOARD_WORKSPACE_STORAGE_KEY);
-  window.localStorage.removeItem(LEGACY_SNAPSHOT_STORAGE_KEY);
+  window.localStorage.removeItem(getWorkspaceStorageKey(storageScope));
+
+  if (!storageScope) {
+    window.localStorage.removeItem(LEGACY_SNAPSHOT_STORAGE_KEY);
+  }
 }
